@@ -208,7 +208,7 @@
                   "autoUpgradeMinorVersion": true,
                   "settings": {
                     "fileUris": [
-                      "https://raw.githubusercontent.com/sabil05/VMSSUpdateRolling/blob/master/installserver.sh"
+                      "https://raw.githubusercontent.com/sabil05/VMSSUpdateRolling/master/installserver.sh"
                     ],
                     "commandToExecute": "bash installserver.sh"
                   }
