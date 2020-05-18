@@ -158,10 +158,7 @@
             }
           ],
             "imageReference": {
-              "publisher": "[variables('imagePublisher')]",
-              "offer": "[variables('imageOffer')]",
-              "sku": "[variables('imageVersion')]",
-              "version": "latest"
+              "id": "/subscriptions/cf30e61c-c01c-4980-ae4c-d7f6660eefc1/resourceGroups/71rollingupdateRG/providers/Microsoft.Compute/galleries/SabilGallery/images/myimageLinux"
             }
           },
           "osProfile": {
