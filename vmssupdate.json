@@ -20,12 +20,10 @@
     }
   },
   "variables": {
-    "imagePublisher": "Canonical",
-    "imageOffer": "UbuntuServer",
-    "imageVersion": "16.04-LTS",
     "addressPrefix": "10.0.0.0/8",
+    "lbPublicIpAddressName": "[concat(variables('namingInfix'), 'lbPublicIP')]",
     "namingInfix": "[toLower(parameters('vmssNamePrefix'))]",
-	"sizeOfDiskInGB": "1023",
+    "sizeOfDiskInGB": "1023",
     "newVNETName": "[concat(variables('namingInfix'), 'vnet')]",
     "subnetName": "subnet",
     "subnetPrefix": "10.0.0.0/16",
@@ -38,7 +36,8 @@
     "bepoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('bepoolName'))]",
     "sshProbeName": "sshProbe",
     "networkApiVersion": "2017-04-01",
-    "computeApiVersion": "2018-10-01"
+    "computeApiVersion": "2019-12-01",
+    "nsgName": "[concat(variables('namingInfix'), 'nsg')]"
   },
   "resources": [
     {
@@ -75,8 +74,8 @@
           {
             "name": "[variables('feIpConfigName')]",
             "properties": {
-              "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('newVNETName'), variables('subnetName'))]"
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses/',variables('lbPublicIpAddressName'))]"
               }
             }
           }
@@ -121,6 +120,56 @@
         ]
       }
     },
+    
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2018-12-01",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHTTPInbound",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 1000,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          }
+        ]
+      }
+    },
+
+
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2018-12-01",
+      "name": "[variables('lbPublicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
       "apiVersion": "[variables('computeApiVersion')]",
@@ -141,7 +190,7 @@
           "mode": "Automatic",
           "automaticOSUpgradePolicy": {
             "enableAutomaticOSUpgrade": "true"
-	  }
+          }
         },
         "overprovision": "true",
         "virtualMachineProfile": {
@@ -174,14 +223,24 @@
               {
                 "name": "[concat('nic', parameters('vmssNamePrefix'))]",
                 "properties": {
+                "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        },
                 "primary": "true",
                 "ipConfigurations": [
                   {
                     "name": "[concat('ipconfig', parameters('vmssNamePrefix'))]",
+                                           
                     "properties": {
-                      "subnet": {
-                        "Id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('newVNETName'), '/subnets/', variables('subnetName'))]"
+                       "subnet": {
+                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('newVNETName'), '/subnets/', variables('subnetName'))]"
                       },
+                    "publicIPAddressconfiguration":{ 
+                        "name": "[variables('lbPublicIPAddressName')]",
+                    "properties": {
+            "idleTimeoutInMinutes": 10
+                    }
+                    },
                       "loadBalancerBackendAddressPools": [
                           {
                             "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/backendAddressPools/', variables('bepoolName'))]"
