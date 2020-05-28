@@ -189,12 +189,6 @@
         "singlePlacementGroup": "true",
         "upgradePolicy": {
           "mode": "Rolling",
-          "rollingUpgradePolicy": {
-          "maxBatchInstancePercent": "20",
-          "maxUnhealthyInstancePercent": "20",
-          "maxUnhealthyUpgradedInstancePercent": "20",
-          "pauseTimeBetweenBatches": "PT10S"
-                  },
           "automaticOSUpgradePolicy": {
             "enableAutomaticOSUpgrade": "true"
           }
