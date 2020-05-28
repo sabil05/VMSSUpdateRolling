@@ -213,7 +213,7 @@
             }
           ],
             "imageReference": {
-              "id": "/subscriptions/cf30e61c-c01c-4980-ae4c-d7f6660eefc1/resourceGroups/71rollingupdateRG/providers/Microsoft.Compute/images/SabilLinuxV100"
+              "id": "/subscriptions/cf30e61c-c01c-4980-ae4c-d7f6660eefc1/resourceGroups/71rollingupdateRG/providers/Microsoft.Compute/galleries/VMSIG/images/Ubuntu_Linux"
             }
           },
           "osProfile": {
