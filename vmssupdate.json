@@ -34,7 +34,7 @@
     "feIpConfigId": "[concat(variables('lbID'),'/frontendIPConfigurations/', variables('feIpConfigName'))]",
     "bepoolName": "[concat(variables('lbName'), 'bepool')]",
     "bepoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('bepoolName'))]",
-    "sshProbeName": "sshProbe",
+    "httpProbe": "sshProbe",
     "networkApiVersion": "2017-04-01",
     "computeApiVersion": "2019-12-01",
     "nsgName": "[concat(variables('namingInfix'), 'nsg')]"
@@ -96,23 +96,24 @@
               "backendAddressPool": {
                 "id": "[variables('bepoolID')]"
               },
-              "protocol": "Tcp",
-              "frontendPort": 22,
-              "backendPort": 22,
+              "protocol": "tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
               "enableFloatingIP": false,
               "idleTimeoutInMinutes": 5,
               "probe": {
-                "id": "[concat(variables('lbId'), '/probes/', variables('sshProbeName'))]"
+                "id": "[concat(variables('lbId'), '/probes/', variables('httpProbe'))]"
               }
             }
           }
         ],
         "probes": [
           {
-            "name": "[variables('sshProbeName')]",
+            "name": "[variables('httpProbe')]",
             "properties": {
-              "protocol": "Tcp",
-              "port": 22,
+              "protocol": "http",
+              "port": 80,
+                          "requestPath": "/",
               "intervalInSeconds": 5,
               "numberOfProbes": 2
             }
@@ -120,7 +121,7 @@
         ]
       }
     },
-    
+
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2018-12-01",
@@ -193,7 +194,7 @@
           "maxUnhealthyInstancePercent": "20",
           "maxUnhealthyUpgradedInstancePercent": "20",
           "pauseTimeBetweenBatches": "PT10S"
-		  },
+                  },
           "automaticOSUpgradePolicy": {
             "enableAutomaticOSUpgrade": "true"
           }
@@ -223,25 +224,22 @@
           },
           "networkProfile": {
             "healthProbe" : {
-              "id": "[concat(variables('lbId'), '/probes/', variables('sshProbeName'))]"
+              "id": "[concat(variables('lbId'), '/probes/', variables('httpProbe'))]"
             },
             "networkInterfaceConfigurations": [
               {
                 "name": "[concat('nic', parameters('vmssNamePrefix'))]",
                 "properties": {
-                "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
-        },
                 "primary": "true",
                 "ipConfigurations": [
                   {
                     "name": "[concat('ipconfig', parameters('vmssNamePrefix'))]",
-                                           
+
                     "properties": {
                        "subnet": {
                         "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('newVNETName'), '/subnets/', variables('subnetName'))]"
                       },
-                    "publicIPAddressconfiguration":{ 
+                    "publicIPAddressconfiguration":{
                         "name": "[variables('lbPublicIPAddressName')]",
                     "properties": {
             "idleTimeoutInMinutes": 10
@@ -254,7 +252,10 @@
                         ]
                       }
                     }
-                  ]
+                  ],
+                                             "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
                 }
               }
             ]
