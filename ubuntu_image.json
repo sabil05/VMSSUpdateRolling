@@ -2,10 +2,10 @@
   "builders": [{
     "type": "azure-arm",
 
-    "client_id": "65fb48df-54bf-4d48-9129-7cecad78538b",
-    "client_secret": "ad4cbaaf-c00b-43d7-a06b-cc2c412221b3",
-    "tenant_id": "2af4eb7f-27d7-4f55-a5ea-9520fba5d756",
-    "subscription_id": "cf30e61c-c01c-4980-ae4c-d7f6660eefc1",
+    "client_id": "",
+    "client_secret": "",
+    "tenant_id": "",
+    "subscription_id": "",
 
     "managed_image_resource_group_name": "71rollingupdateRG",
     "managed_image_name": "SabilLinux",
@@ -30,7 +30,7 @@
       "apt-get update",
       "apt-get upgrade -y",
       "apt-get -y install nginx",
-	  "echo 'version 1.0.0' >> /var/www/html/index.nginx-debian.html"
+	  "echo 'version 1.0.0' >> /var/www/html/index.nginx-debian.html",
 
       "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
     ],
